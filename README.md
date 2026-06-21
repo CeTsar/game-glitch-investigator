@@ -1,4 +1,3 @@
-# game-glitch-investigator
 
 # Game Glitch Investigator
 
