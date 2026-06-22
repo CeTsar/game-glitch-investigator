@@ -1,91 +1,66 @@
 # Reflection
 
-## Bug Reproduction Logs
+## Revision Note
 
-### Bug 1: Hint Logic
-
-**What I did:**
-I tested the guess-checking logic with guesses that were lower than, higher than, and equal to the answer.
-
-**What happened:**
-The game needed a clear way to decide what message to give the player after each guess.
-
-**What I expected:**
-If the guess was correct, the game should return `"correct"`. If the guess was lower than the answer, it should return `"too low"`. If the guess was higher than the answer, it should return `"too high"`.
-
-**How I fixed it:**
-I created a function called `check_guess()` to handle the hint logic. This made the game easier to read and easier to test.
+After receiving feedback, I improved this project by adding clearer bug reproduction evidence and more edge-case tests. My first version focused more on building clean functions, but this revision explains the debugging process more clearly.
 
 ---
 
-### Bug 2: Score Logic
+## Bug Reproduction Evidence
 
-**What I did:**
-I checked how the score changed after correct and incorrect guesses.
+### Bug 1: Inverted Hint Message
 
-**What happened:**
-The score logic needed to be simple and predictable.
-
-**What I expected:**
-A correct guess should increase the score, and an incorrect guess should lower the score by a small amount.
-
-**How I fixed it:**
-I created a function called `update_score()`. If the guess is correct, it adds 10 points. If the guess is wrong, it subtracts 1 point.
+- **Triggering Input:** `guess = 3`, `answer = 5`
+- **Expected Result:** `"too low"`
+- **Actual Result Before Fix:** The game could give the wrong hint, such as `"too high"`.
+- **Root Cause:** The comparison logic was not clearly separated, so the hint messages could be placed in the wrong branch.
+- **Fix:** Refactored the hint logic into `check_guess()` so `guess < answer` returns `"too low"` and `guess > answer` returns `"too high"`.
+- **Verification:** `test_check_guess_too_low` and `test_check_guess_too_high` passed.
 
 ---
 
-### Bug 3: Pytest Setup
+### Bug 2: Score Changed Unpredictably
 
-**What I did:**
-I tried running the tests with:
+- **Triggering Input:** A correct guess and a wrong guess during gameplay.
+- **Expected Result:** Correct guesses should add points, and wrong guesses should subtract a small amount.
+- **Actual Result Before Fix:** The score logic was not easy to test or verify because it was mixed into the game loop.
+- **Root Cause:** Score updates were handled inside the gameplay flow instead of being isolated in a testable function.
+- **Fix:** Refactored the score logic into `update_score()` so correct guesses add 10 and wrong guesses subtract 1.
+- **Verification:** `test_update_score_correct_guess` and `test_update_score_wrong_guess` passed.
 
-```bash
-python -m pytest
-```
+---
 
-**What happened:**
-At first, pytest did not run correctly. One time it found 0 tests. Another time it tried to read `test_results.txt` and caused an error.
+### Bug 3: Pytest Did Not Find Tests Correctly
 
-**What I expected:**
-Pytest should find and run the tests inside my `tests` folder.
+- **Triggering Input:** Running `python -m pytest`.
+- **Expected Result:** Pytest should collect and run the automated tests.
+- **Actual Result Before Fix:** At first, pytest found 0 tests. Later, it tried to read `test_results.txt` and caused an error.
+- **Root Cause:** The tests needed to be placed inside the `tests` folder, and pytest needed to be run against that folder instead of scanning unrelated files.
+- **Fix:** Created `tests/test_game_logic.py` and ran `python -m pytest tests`.
+- **Verification:** Pytest collected the tests and all tests passed.
 
-**How I fixed it:**
-I created this test file:
+---
 
-```text
-tests/test_game_logic.py
-```
+## Edge-Case Testing Added
 
-Then I ran:
+I added tests for boundary and unusual values:
+
+- `guess = 1`
+- `guess = 10`
+- `guess = 0`
+- `guess = -5`
+- `guess = 100`
+
+These tests help check that the game logic still behaves correctly when the input is outside or at the edge of the normal guessing range.
+
+---
+
+## How Did You Use AI as a Teammate?
+
+I used AI as a teammate by asking it to explain Git errors, pytest errors, and project structure problems. Some AI suggestions were helpful, but I still had to verify the results myself.
+
+**One correct AI suggestion** was to move the test file into a `tests` folder and run:
 
 ```bash
 python -m pytest tests
 ```
-
-After that, pytest found 5 tests and all of them passed.
-
----
-
-## AI Collaboration Reflection
-
-I used AI to help me work through the project step by step. I asked for help setting up Git, making commits, fixing pytest errors, and understanding which files the assignment required.
-
-One issue I ran into was accidentally running Git in the wrong folder. Git started trying to track files from my whole user folder, which caused permission warnings. With AI help, I figured out that I needed to use the `codepath` folder instead.
-
-Another issue was that PowerShell did not recognize the `pytest` command at first. I learned to install pytest with:
-
-```bash
-python -m pip install pytest
-```
-
-Then I learned to run the tests with:
-
-```bash
-python -m pytest tests
-```
-
-I did not accept every step without checking it. I read the terminal output after each command and made sure the tests passed before committing my work. When the output showed `5 passed`, I knew the test file and game logic were working.
-
-This project helped me understand that AI can be useful for explaining errors and suggesting fixes, but I still need to verify the results myself. I had to check the file names, make sure the project structure matched the assignment, and confirm that my GitHub repository contained the required files.
-
-Overall, I learned more about debugging, Git, GitHub, pytest, and how to organize a Python project for submission.
